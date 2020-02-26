@@ -36,6 +36,16 @@ function aStar(maze, start, end){
           path.push(current.pos)
           current = current.parent
         }
+        for(node of open_list){
+          // console.log(node);
+          board[node.pos[0]][node.pos[1]] = "o"
+        }
+        for(node of path){
+          // console.log(node);
+          board[node[0]][node[1]] = "O"
+        }
+        console.table(board);
+
       return path.reverse()
     }
 
@@ -91,8 +101,8 @@ let currentY = startY
 let current = [startX, startY]
 
 //end point
-let endX = 8
+let endX = 9
 let endY = 8
 let end = [endX, endY]
 let path = aStar(board, start, end)
-console.log(path,"done");
+// console.log(path,"done");
