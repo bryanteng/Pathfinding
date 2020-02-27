@@ -89,7 +89,7 @@ let y = 10
 let yArr = "0".repeat(y).split('').map(x=>+x)
 let arr = Array.from({length:x}).map(x=>yArr.slice())
 let board = arr.slice()
-
+console.log(board);
 //start pointx
 let startX = 1
 let startY = 1
