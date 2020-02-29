@@ -34,7 +34,7 @@ function aStar(maze, start, end){
         }
         for(let node of path){
           // console.log(node);
-          board[node[0]][node[1]] = "X"
+          board[node[0]][node[1]] = "O"
         }
         console.table(board);
         return board
