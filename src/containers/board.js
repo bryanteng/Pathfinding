@@ -1,14 +1,15 @@
 import React, { Component } from 'react'
 import Logo from "../edit_icon.png"
+import aStar from '../util/aStar'
 
 export default class board extends Component{
 
   state={
     x_coord:10,
     y_coord:10,
-    start:"0,0",
+    start:"1,1",
     editStart: false,
-    end:"0,0",
+    end:"7,7",
     editEnd: false,
     boardState:[[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
                 [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -45,6 +46,14 @@ export default class board extends Component{
     this.setState({[event.target.id]: !this.state[event.target.id]}, ()=>{console.log(this.state)} )
   }
 
+  solveClick = (event) =>{
+    let start = this.state.start.split(",").map(x=> +x)
+    let end = this.state.end.split(",").map(x=> +x)
+
+    let board = aStar(this.state.boardState, start, end)
+    this.setState({boardState: board})
+  }
+
   render(){
     return(
       <div>
@@ -53,12 +62,14 @@ export default class board extends Component{
         <img src={Logo} alt="website logo" />
         <input type="text" pattern="[0-9]*" value={this.state.y_coord} id="y_coord" onChange={this.change_coord}></input>
         <img src={Logo} alt="website logo" />
-        <h4>[{this.state.start}]</h4>
+        <label>[{this.state.start}]</label>
         <button id="editStart" onClick={this.buttonClick}>{this.state.editStart ? "click a cell" : "click to edit start"}</button>
         <img src={Logo} alt="website logo" />
-        <h4>[{this.state.end}]</h4>
+        <label>[{this.state.end}]</label>
         <button id="editEnd" onClick={this.buttonClick}>{this.state.editEnd ? "click a cell" : "click to edit end"}</button>
         <img src={Logo} alt="website logo" />
+        <button id="solve" onClick={this.solveClick}>solve path</button>
+
         <table className="maze">
           {this.state.boardState.map((line,row_index) =>{
           return <tr  key={row_index} className="line">{line.map((block,index)=>{
