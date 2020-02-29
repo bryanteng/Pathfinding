@@ -1,10 +1,15 @@
 import React, { Component } from 'react'
+import Logo from "../edit_icon.png"
 
 export default class board extends Component{
 
   state={
     x_coord:10,
     y_coord:10,
+    start:"0,0",
+    editStart: false,
+    end:"0,0",
+    editEnd: false,
     boardState:[[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
                 [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
                 [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -27,16 +32,37 @@ export default class board extends Component{
     })
   }
 
+  clickedCell = (event) =>{
+    console.log(event.target.getAttribute('loc'))
+    if(this.state.editStart){
+      this.setState({start: event.target.getAttribute('loc'), editStart: false})
+    }else if(this.state.editEnd){
+      this.setState({end: event.target.getAttribute('loc'), editEnd: false})
+    }
+  }
+
+  buttonClick = (event) =>{
+    this.setState({[event.target.id]: !this.state[event.target.id]}, ()=>{console.log(this.state)} )
+  }
+
   render(){
     return(
       <div>
         <h1> here </h1>
         <input type="text" pattern="[0-9]*" value={this.state.x_coord} id="x_coord" onChange={this.change_coord}></input>
+        <img src={Logo} alt="website logo" />
         <input type="text" pattern="[0-9]*" value={this.state.y_coord} id="y_coord" onChange={this.change_coord}></input>
+        <img src={Logo} alt="website logo" />
+        <h4>[{this.state.start}]</h4>
+        <button id="editStart" onClick={this.buttonClick}>{this.state.editStart ? "click a cell" : "click to edit start"}</button>
+        <img src={Logo} alt="website logo" />
+        <h4>[{this.state.end}]</h4>
+        <button id="editEnd" onClick={this.buttonClick}>{this.state.editEnd ? "click a cell" : "click to edit end"}</button>
+        <img src={Logo} alt="website logo" />
         <table className="maze">
-          {this.state.boardState.map((line,index) =>{
-          return <tr className="line">{line.map((block,index)=>{
-                  return <td className="block" style={{backgroundColor: block ? block : null}} >{block}</td>
+          {this.state.boardState.map((line,row_index) =>{
+          return <tr  key={row_index} className="line">{line.map((block,index)=>{
+                  return <td className="block" key={index} loc={[row_index,index]} style={{backgroundColor: block ? block : null}} onClick={this.clickedCell}>{block}</td>
               })}</tr>
           }) }
         </table>
