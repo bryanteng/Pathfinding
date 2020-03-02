@@ -1,4 +1,4 @@
-const Node = require('../classes/Node.js')
+const Node = require('../classes/Node.js').default
 
 function aStar(maze, start, end){
   let startNode = new Node(undefined, start)
@@ -30,14 +30,14 @@ function aStar(maze, start, end){
         }
         for(let node of open_list){
           // console.log(node);
-          board[node.pos[0]][node.pos[1]] = "x"
+          maze[node.pos[0]][node.pos[1]] = "x"
         }
         for(let node of path){
           // console.log(node);
-          board[node[0]][node[1]] = "O"
+          maze[node[0]][node[1]] = "O"
         }
-        console.table(board);
-        return board
+        console.table(maze);
+        return maze
       return path.reverse()
     }
 
@@ -75,22 +75,22 @@ function aStar(maze, start, end){
   }
 }
 //create nested array
-let x = 10
-let y = 10
-
-let yArr = "0".repeat(y).split('').map(x=>+x)
-let arr = Array.from({length:x}).map(x=>yArr.slice())
-let board = arr.slice()
+// let x = 10
+// let y = 10
+//
+// let yArr = "0".repeat(y).split('').map(x=>+x)
+// let arr = Array.from({length:x}).map(x=>yArr.slice())
+// let board = arr.slice()
 
 //start pointx
-let startX = 9
-let startY = 9
-let start = [startX,startY]
+// let startX = 9
+// let startY = 9
+// let start = [startX,startY]
 
 //end point
-let endX = 0
-let endY = 0
-let end = [endX, endY]
+// let endX = 0
+// let endY = 0
+// let end = [endX, endY]
 // let path = aStar(board, start, end)
 // console.log(path,"done");
 module.exports = aStar

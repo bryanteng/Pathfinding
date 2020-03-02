@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Logo from "../edit_icon.png"
 import aStar from '../util/aStar'
+import Cell from '../components/cell'
 
 export default class board extends Component{
 
@@ -57,25 +58,29 @@ export default class board extends Component{
   render(){
     return(
       <div>
-        <h1> here </h1>
+        <h1> Pathfinding </h1>
+        <label >number of rows: </label>
         <input type="text" pattern="[0-9]*" value={this.state.x_coord} id="x_coord" onChange={this.change_coord}></input>
         <img src={Logo} alt="website logo" />
+        <label >number of columns: </label>
         <input type="text" pattern="[0-9]*" value={this.state.y_coord} id="y_coord" onChange={this.change_coord}></input>
         <img src={Logo} alt="website logo" />
-        <label>[{this.state.start}]</label>
+        <label>start:[{this.state.start}]</label>
         <button id="editStart" onClick={this.buttonClick}>{this.state.editStart ? "click a cell" : "click to edit start"}</button>
         <img src={Logo} alt="website logo" />
-        <label>[{this.state.end}]</label>
+        <label>end:[{this.state.end}]</label>
         <button id="editEnd" onClick={this.buttonClick}>{this.state.editEnd ? "click a cell" : "click to edit end"}</button>
         <img src={Logo} alt="website logo" />
         <button id="solve" onClick={this.solveClick}>solve path</button>
 
         <table className="maze">
+        <tbody>
           {this.state.boardState.map((line,row_index) =>{
           return <tr  key={row_index} className="line">{line.map((block,index)=>{
-                  return <td className="block" key={index} loc={[row_index,index]} style={{backgroundColor: block ? block : null}} onClick={this.clickedCell}>{block}</td>
+                  return <Cell key={index} loc={[row_index,index]} style={{backgroundColor: block ? block : null}} onClick={this.clickedCell.bind(this)} block={block}/>
               })}</tr>
           }) }
+          </tbody>
         </table>
       </div>
     )
