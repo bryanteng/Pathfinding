@@ -36,7 +36,6 @@ function aStar(maze, start, end){
           // console.log(node);
           maze[node[0]][node[1]] = "O"
         }
-        console.table(maze);
         return maze
       return path.reverse()
     }
