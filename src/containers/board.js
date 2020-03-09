@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import Logo from "../edit_icon.png"
 import BFS from '../util/BFS'
+import aStar from '../util/aStar'
+
 import Cell from '../components/cell'
 
 export default class board extends Component{
@@ -12,6 +14,7 @@ export default class board extends Component{
     editStart: false,
     end:"7,7",
     editEnd: false,
+    selectedOption: "aStar",
     boardState:[[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
                 [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
                 [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -47,7 +50,12 @@ export default class board extends Component{
   solveClick = (event) =>{
     let start = this.state.start.split(",").map(x=> +x)
     let end = this.state.end.split(",").map(x=> +x)
-    let board = BFS(this.cleanBoard(), start, end)
+    let board
+    if(this.state.selectedOption == "aStar"){
+      board = aStar(this.cleanBoard(), start, end)
+    }else if(this.state.selectedOption == "BFS"){
+      board = BFS(this.cleanBoard(), start, end)
+    }
     console.log(board)
     this.setState({boardState: board})
   }
@@ -62,6 +70,11 @@ export default class board extends Component{
     let arr = Array.from({length:this.state.x_coord}).map(x=>yArr.slice())
     let board = arr.slice()
     return board
+  }
+
+  optionChange = (event) =>{
+    console.log(event.target.value)
+    this.setState({selectedOption: event.target.value})
   }
 
 
@@ -82,6 +95,21 @@ export default class board extends Component{
         <label>end:[{this.state.end}]</label>
         <button id="editEnd" onClick={this.buttonClick}>{this.state.editEnd ? "click a cell" : "click to edit end"}</button>
         <img src={Logo} alt="website logo" />
+        <form>
+          <div className="radio">
+            <label>
+              <input type="radio" value="aStar" onChange={this.optionChange} checked={this.state.selectedOption === 'option1'} />
+              A* algorithm
+            </label>
+          </div>
+          <div className="radio">
+            <label>
+              <input type="radio" value="BFS" onChange={this.optionChange} checked={this.state.selectedOption === 'option2'} />
+              Breadth first Search Algorithm
+            </label>
+          </div>
+        </form>
+
         <button id="solve" onClick={this.solveClick}>solve path</button>
         <button id="reset" onClick={this.resetClick}>reset board</button>
 

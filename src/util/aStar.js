@@ -1,70 +1,74 @@
 const Node = require('../classes/Node.js').default
 
-function aStar(maze, start, end){
+function aStar(maze, start, end) {
   let startNode = new Node(undefined, start)
   let endNode = new Node(undefined, end)
   let open_list = [startNode]
   let closed_list = []
+
   const N = maze.length;
   const M = maze[0].length;
   const isValidPos = (x, y) => x >= 0 && x < N && y >= 0 && y < M;
 
-  while(open_list.length > 0){
+  while (open_list.length > 0) {
     let currentNode = open_list[0]
-    console.log(currentNode)
     let currentIndex = 0
-
     open_list.forEach(function (value, i) {
-      if(value.f < currentNode.f){
+      if (value.f < currentNode.f) {
         currentNode = value
         currentIndex = i
       }
     });
-    open_list.pop(currentIndex)
+    let pop = open_list.splice(currentIndex, 1)[0]
     closed_list.push(currentNode)
-    if(currentNode.pos[0] == endNode.pos[0] && currentNode.pos[1] == endNode.pos[1]){
+
+    if (currentNode.pos[0] == endNode.pos[0] && currentNode.pos[1] == endNode.pos[1]) {
       let path = []
       let current = currentNode
-      while(current){
-          path.push(current.pos)
-          current = current.parent
-        }
-        for(let node of open_list){
-          maze[node.pos[0]][node.pos[1]] = "x"
-        }
-        for(let node of path){
-          maze[node[0]][node[1]] = "O"
-        }
-        return maze
+      while (current) {
+        path.push(current.pos)
+        current = current.parent
+      }
+      for (let node of open_list) {
+        maze[node.pos[0]][node.pos[1]] = "x"
+      }
+      for (let node of path) {
+        maze[node[0]][node[1]] = "O"
+      }
+      return maze
       // return path.reverse()
     }
 
     let children = []
 
     let direction = [[0, -1], [0, 1], [-1, 0], [1, 0], [-1, -1], [-1, 1], [1, -1], [1, 1]]
-    for(let [moveX, moveY] of direction){
+    for (let [moveX, moveY] of direction) {
       const nextX = currentNode.pos[0] + moveX;
       const nextY = currentNode.pos[1] + moveY;
-      if(isValidPos(nextX, nextY) && maze[nextX][nextY] == 0 ){
+      if (isValidPos(nextX, nextY) && maze[nextX][nextY] == 0) {
         let new_node = new Node(currentNode, [nextX, nextY])
         children.push(new_node)
       }
     }
 
-    for(let child of children){
-      for(let closed_child of closed_list)
-          if(child == closed_child) continue
-      child.g = currentNode.g + 1
-      child.h = ((child.pos[0] - endNode.pos[0]) ** 2) + ((child.pos[1] - endNode.pos[1]) ** 2)
-      child.f = child.g + child.h
+    for (let child of children) {
+      console.log(child, "child")
+      for (let closed_child of closed_list) {
+        if (child.pos[0] == closed_child.pos[0] && child.pos[1] == closed_child.pos[1]) continue
+        child.g = currentNode.g + 1
+        child.h = ((child.pos[0] - endNode.pos[0]) ** 2) + ((child.pos[1] - endNode.pos[1]) ** 2)
+        child.f = child.g + child.h
 
-      for(let open_node of open_list){
-          if(child == open_node && child.g > open_node.g) continue
+        for (let open_node of open_list) {
+          if (child == open_node && child.g > open_node.g) continue
+        }
+        open_list.push(child)
+        maze[currentNode.pos[0]][currentNode.pos[1]] = 1
       }
-      open_list.push(child)
     }
+
   }
-  return -1
+  return false
 }
 //create nested array
 // let x = 10
