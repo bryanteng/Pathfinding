@@ -3,17 +3,18 @@ const Node = require('../classes/Node.js').default
 function aStar(maze, start, end){
   let startNode = new Node(undefined, start)
   let endNode = new Node(undefined, end)
-  let open_list = []
+  let open_list = [startNode]
   let closed_list = []
-
-  open_list.push(startNode)
+  const N = maze.length;
+  const M = maze[0].length;
+  const isValidPos = (x, y) => x >= 0 && x < N && y >= 0 && y < M;
 
   while(open_list.length > 0){
     let currentNode = open_list[0]
+    console.log(currentNode)
     let currentIndex = 0
 
     open_list.forEach(function (value, i) {
-      // console.table(value);
       if(value.f < currentNode.f){
         currentNode = value
         currentIndex = i
@@ -29,27 +30,25 @@ function aStar(maze, start, end){
           current = current.parent
         }
         for(let node of open_list){
-          // console.log(node);
           maze[node.pos[0]][node.pos[1]] = "x"
         }
         for(let node of path){
-          // console.log(node);
           maze[node[0]][node[1]] = "O"
         }
         return maze
-      return path.reverse()
+      // return path.reverse()
     }
 
     let children = []
 
     let direction = [[0, -1], [0, 1], [-1, 0], [1, 0], [-1, -1], [-1, 1], [1, -1], [1, 1]]
-    for(let dir of direction){
-      let node_position = [currentNode.pos[0] + dir[0], currentNode.pos[1] + dir[1]]
-      if(node_position[0] > maze.length - 1 || node_position[0] < 0 || node_position[1] > maze[maze.length-1].length - 1 || node_position[1] < 0) continue
-      if(maze[node_position[0]][node_position[1]] != 0) continue
-
-      let new_node = new Node(currentNode, node_position)
-      children.push(new_node)
+    for(let [moveX, moveY] of direction){
+      const nextX = currentNode.pos[0] + moveX;
+      const nextY = currentNode.pos[1] + moveY;
+      if(isValidPos(nextX, nextY) && maze[nextX][nextY] == 0 ){
+        let new_node = new Node(currentNode, [nextX, nextY])
+        children.push(new_node)
+      }
     }
 
     for(let child of children){
@@ -64,14 +63,8 @@ function aStar(maze, start, end){
       }
       open_list.push(child)
     }
-    //
-    // board[startNode.pos[0]][startNode.pos[1]] = "o"
-    // board[currentNode.pos[0]][currentNode.pos[0]] = "^"
-    // board[endNode.pos[0]][endNode.pos[0]] = "O"
-
-    // console.log(startG,startH,startF,startX,endY)
-    // console.log(open_list)
   }
+  return -1
 }
 //create nested array
 // let x = 10
