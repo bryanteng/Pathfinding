@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Logo from "../edit_icon.png"
-import aStar from '../util/aStar'
+import BFS from '../util/BFS'
 import Cell from '../components/cell'
 
 export default class board extends Component{
@@ -27,15 +27,12 @@ export default class board extends Component{
   change_coord = (event) =>{
     const val = (event.target.validity.valid) ? event.target.value : this.state[event.target.id]
     this.setState({[event.target.id]: +val},()=>{
-      let yArr = "0".repeat(this.state.y_coord).split('').map(x=>+x)
-      let arr = Array.from({length:this.state.x_coord}).map(x=>yArr.slice())
-      let board = arr.slice()
+      let board = this.cleanBoard()
       this.setState({boardState: board})
     })
   }
 
   clickedCell = (event) =>{
-    console.log(event.target.getAttribute('loc'))
     if(this.state.editStart){
       this.setState({start: event.target.getAttribute('loc'), editStart: false})
     }else if(this.state.editEnd){
@@ -44,18 +41,32 @@ export default class board extends Component{
   }
 
   buttonClick = (event) =>{
-    this.setState({[event.target.id]: !this.state[event.target.id]}, ()=>{console.log(this.state)} )
+    this.setState({[event.target.id]: !this.state[event.target.id]} )
   }
 
   solveClick = (event) =>{
     let start = this.state.start.split(",").map(x=> +x)
     let end = this.state.end.split(",").map(x=> +x)
-
-    let board = aStar(this.state.boardState, start, end)
+    let board = BFS(this.cleanBoard(), start, end)
+    console.log(board)
     this.setState({boardState: board})
   }
 
+  resetClick = () =>{
+    let board = this.cleanBoard()
+    this.setState({boardState: board})
+  }
+
+   cleanBoard=()=>{
+    let yArr = "0".repeat(this.state.y_coord).split('').map(x=>+x)
+    let arr = Array.from({length:this.state.x_coord}).map(x=>yArr.slice())
+    let board = arr.slice()
+    return board
+  }
+
+
   render(){
+    console.log(this.state)
     return(
       <div>
         <h1> Pathfinding </h1>
@@ -72,6 +83,8 @@ export default class board extends Component{
         <button id="editEnd" onClick={this.buttonClick}>{this.state.editEnd ? "click a cell" : "click to edit end"}</button>
         <img src={Logo} alt="website logo" />
         <button id="solve" onClick={this.solveClick}>solve path</button>
+        <button id="reset" onClick={this.resetClick}>reset board</button>
+
 
         <table className="maze">
         <tbody>
