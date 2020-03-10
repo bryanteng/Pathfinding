@@ -21,6 +21,11 @@
   background-color: #D2B3A9
 }
 
+tr td{
+    border: 1px solid black;
+    background-color: #5e646d;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
