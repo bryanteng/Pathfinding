@@ -33,7 +33,6 @@ var BFS = function (maze, start, end) {
               maze[node[0]][node[1]] = "O"
             }
             return maze
-            return dist;
         }
 
         for (let [moveX, moveY] of directs) {
