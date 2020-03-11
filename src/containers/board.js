@@ -15,6 +15,8 @@ export default class board extends Component{
     end:"7,7",
     editEnd: false,
     selectedOption: "aStar",
+    createWall: true,
+    walls: [],
     boardState:[[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
                 [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
                 [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -29,6 +31,7 @@ export default class board extends Component{
 
   change_coord = (event) =>{
     const val = (event.target.validity.valid) ? event.target.value : this.state[event.target.id]
+    this.clearWalls()
     this.setState({[event.target.id]: +val},()=>{
       let board = this.cleanBoard()
       this.setState({boardState: board})
@@ -40,6 +43,22 @@ export default class board extends Component{
       this.setState({start: event.target.getAttribute('loc'), editStart: false})
     }else if(this.state.editEnd){
       this.setState({end: event.target.getAttribute('loc'), editEnd: false})
+    }else if(this.state.createWall){
+      let loc = event.target.getAttribute('loc').split(",")
+      let board = this.state.boardState
+      let walls = this.state.walls
+      if(board[loc[0]][loc[1]] == "W"){
+        walls = walls.filter(x=>{
+          if(x[0] == loc[0] && x[1] == loc[1]) return false
+          return true
+        } )
+        board[loc[0]][loc[1]] = 0
+      }else{
+        walls = walls.concat([loc])
+        board[loc[0]][loc[1]] = "W"
+      }
+
+      this.setState({boardState: board, walls: walls})
     }
   }
 
@@ -56,7 +75,6 @@ export default class board extends Component{
     }else if(this.state.selectedOption == "BFS"){
       board = BFS(this.cleanBoard(), start, end)
     }
-    console.log(board)
     this.setState({boardState: board})
   }
 
@@ -69,11 +87,21 @@ export default class board extends Component{
     let yArr = "0".repeat(this.state.y_coord).split('').map(x=>+x)
     let arr = Array.from({length:this.state.x_coord}).map(x=>yArr.slice())
     let board = arr.slice()
+    for(let [w1, w2] of this.state.walls){
+      board[w1][w2] = "W"
+    }
     return board
   }
 
+  clearWalls = () =>{
+    let board = this.state.boardState
+    for(let [w1, w2] of this.state.walls){
+      board[w1][w2] = 0
+    }
+    this.setState({walls: [], boardState: board}, ()=> this.cleanBoard())
+  }
+
   optionChange = (event) =>{
-    console.log(event.target.value)
     this.setState({selectedOption: event.target.value})
   }
 
@@ -94,17 +122,20 @@ export default class board extends Component{
         <img src={Logo} alt="website logo" />
         <label>end:[{this.state.end}]</label>
         <button id="editEnd" onClick={this.buttonClick}>{this.state.editEnd ? "click a cell" : "click to edit end"}</button>
+        <button id="createWall" onClick={this.buttonClick}>{this.state.createWall ? "click cells to create a wall" : "click to turn off wall creation"}</button>
+        <button id="clearWalls" onClick={this.clearWalls}>clear walls</button>
+
         <img src={Logo} alt="website logo" />
         <form>
           <div className="radio">
-            <label>
-              <input type="radio" value="aStar" onChange={this.optionChange} checked={this.state.selectedOption === 'option1'} />
+            <label className={this.state.selectedOption == "aStar" ? "selected" : null} >
+              <input type="radio" value="aStar" onChange={this.optionChange} checked={this.state.selectedOption === 'aStar'} />
               A* algorithm
             </label>
           </div>
           <div className="radio">
-            <label>
-              <input type="radio" value="BFS" onChange={this.optionChange} checked={this.state.selectedOption === 'option2'} />
+            <label className={this.state.selectedOption == "BFS" ? "selected" : null} >
+              <input type="radio" value="BFS" onChange={this.optionChange} checked={this.state.selectedOption === 'BFS'} />
               Breadth first Search Algorithm
             </label>
           </div>
