@@ -55,3 +55,16 @@ tr td{
     transform: rotate(360deg);
   }
 }
+
+.selected{
+  text-decoration: underline;
+}
+
+.bar {
+    width:auto;
+    background: #6FD967;
+    background-image: linear-gradient(to bottom right,rgba(230,100,101) 0,rgba(230,100,101) 1px,transparent 1px,transparent 67px,rgba(230,100,101) 67px,rgba(230,100,101) 73px,transparent 73px,transparent 138px,rgba(230,100,101) 138px,rgba(230,100,101) 144px,transparent 144px),linear-gradient(to bottom left,rgba(230,100,101) 0,rgba(230,100,101) 1px,transparent 1px,transparent 67px,rgba(230,100,101) 67px,rgba(230,100,101) 73px,transparent 73px,transparent 138px,rgba(230,100,101) 138px,rgba(230,100,101) 144px,transparent 144px);
+    background-size: 100px 100px,100px 100px;
+    background-position: 50% 50%,50% 50%;
+    background-repeat: repeat;
+  }

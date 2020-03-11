@@ -1,6 +1,6 @@
 const Node = require('../classes/Node.js').default
 
-var BFS = function (maze, start, end) {
+export default function BFS(maze, start, end) {
     //start pointx
     // let startX = 0
     // let startY = 0
@@ -14,6 +14,11 @@ var BFS = function (maze, start, end) {
     const N = maze.length;
     const M = maze[0].length;
     const isValidPos = (x, y) => x >= 0 && x < N && y >= 0 && y < M;
+    if(!isValidPos(start[0],start[1]) || !isValidPos(end[0],end[1])){
+      alert("please pick a start and end point within the board")
+      return maze
+    }
+
     while (queue.length) {
         let current = queue.shift();
         const {parent, pos: [x, y], dist } = current
@@ -22,7 +27,6 @@ var BFS = function (maze, start, end) {
             let node = new Node(parent, [x, y], dist)
             let path = []
             while (node) {
-                console.log(node.pos)
                 path.push(node.pos)
                 node = node.parent
             }
@@ -50,4 +54,4 @@ var BFS = function (maze, start, end) {
     return -1;
 };
 
-module.exports = BFS
+// module.exports = BFS

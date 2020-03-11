@@ -1,6 +1,6 @@
 const Node = require('../classes/Node.js').default
 
-function aStar(maze, start, end) {
+export default function aStar(maze, start, end) {
   let startNode = new Node(undefined, start)
   let endNode = new Node(undefined, end)
   let open_list = [startNode]
@@ -9,10 +9,15 @@ function aStar(maze, start, end) {
   const N = maze.length;
   const M = maze[0].length;
   const isValidPos = (x, y) => x >= 0 && x < N && y >= 0 && y < M;
+  if(!isValidPos(start[0],start[1]) || !isValidPos(end[0],end[1])){
+    alert("please pick a start and end point within the board")
+    return maze
+  }
 
   while (open_list.length > 0) {
     let currentNode = open_list[0]
     let currentIndex = 0
+    console.log(currentNode, open_list,"current");
     open_list.forEach(function (value, i) {
       if (value.f < currentNode.f) {
         currentNode = value
@@ -45,14 +50,14 @@ function aStar(maze, start, end) {
     for (let [moveX, moveY] of direction) {
       const nextX = currentNode.pos[0] + moveX;
       const nextY = currentNode.pos[1] + moveY;
-      if (isValidPos(nextX, nextY) && maze[nextX][nextY] == 0) {
+      if (isValidPos(nextX, nextY) && maze[nextX][nextY] == 0 && maze[nextX][nextY] != "W") {
         let new_node = new Node(currentNode, [nextX, nextY])
+        maze[nextX][nextY] = "x"
         children.push(new_node)
       }
     }
 
     for (let child of children) {
-      console.log(child, "child")
       for (let closed_child of closed_list) {
         if (child.pos[0] == closed_child.pos[0] && child.pos[1] == closed_child.pos[1]) continue
         child.g = currentNode.g + 1
@@ -63,12 +68,13 @@ function aStar(maze, start, end) {
           if (child == open_node && child.g > open_node.g) continue
         }
         open_list.push(child)
-        maze[currentNode.pos[0]][currentNode.pos[1]] = 1
+        maze[currentNode.pos[0]][currentNode.pos[1]] = "x"
       }
     }
 
   }
-  return false
+  alert("path not possible")
+  return maze
 }
 //create nested array
 // let x = 10
@@ -89,4 +95,4 @@ function aStar(maze, start, end) {
 // let end = [endX, endY]
 // let path = aStar(board, start, end)
 // console.log(path,"done");
-module.exports = aStar
+// module.exports = aStar

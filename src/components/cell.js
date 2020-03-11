@@ -9,10 +9,13 @@ export default class Cell extends Component{
         color = "LimeGreen"
       }else if(block == "x"){
         color = "#C80003"
+      }else if(block == "W"){
+        color = "Black"
+        var classN = "bar"
       }
     }
     return(
-      <td className="block" key={key} loc={loc} style={{backgroundColor: color ? color : null}} onClick={this.props.onClick}>{block}</td>
+      <td className={classN ? classN : null} key={key} loc={loc} style={{backgroundColor: color ? color : null}} onClick={this.props.onClick}>{block}</td>
     )
   }
 }
