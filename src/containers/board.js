@@ -29,6 +29,10 @@ export default class board extends Component{
                 [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]]
     }
 
+    componentDidMount(){
+      Math.floor(Math.random*10)
+    }
+
   change_coord = (event) =>{
     const val = (event.target.validity.valid) ? event.target.value : this.state[event.target.id]
     this.clearWalls()
@@ -75,6 +79,8 @@ export default class board extends Component{
     }else if(this.state.selectedOption == "BFS"){
       board = BFS(this.cleanBoard(), start, end)
     }
+    board[start[0]][start[1]] = "S"
+    board[end[0]][end[1]] = "E"
     this.setState({boardState: board})
   }
 
@@ -108,34 +114,34 @@ export default class board extends Component{
 
   render(){
     console.log(this.state)
+    const {x_coord, y_coord, start, end, editStart, editEnd, createWall, selectedOption, boardState} = this.state
     return(
       <div>
         <h1> Pathfinding </h1>
         <label >number of rows: </label>
-        <input type="text" pattern="[0-9]*" value={this.state.x_coord} id="x_coord" onChange={this.change_coord}></input>
+        <input type="text" pattern="[0-9]*" value={x_coord} id="x_coord" onChange={this.change_coord}></input>
         <img src={Logo} alt="website logo" />
         <label >number of columns: </label>
-        <input type="text" pattern="[0-9]*" value={this.state.y_coord} id="y_coord" onChange={this.change_coord}></input>
+        <input type="text" pattern="[0-9]*" value={y_coord} id="y_coord" onChange={this.change_coord}></input>
         <img src={Logo} alt="website logo" />
-        <label>start:[{this.state.start}]</label>
-        <button id="editStart" onClick={this.buttonClick}>{this.state.editStart ? "click a cell" : "click to edit start"}</button>
+        <label>start:[{start}]</label>
+        <button id="editStart" onClick={this.buttonClick}>{editStart ? "click a cell" : "click to edit start"}</button>
         <img src={Logo} alt="website logo" />
-        <label>end:[{this.state.end}]</label>
-        <button id="editEnd" onClick={this.buttonClick}>{this.state.editEnd ? "click a cell" : "click to edit end"}</button>
-        <button id="createWall" onClick={this.buttonClick}>{this.state.createWall ? "click cells to create a wall" : "click to turn off wall creation"}</button>
+        <label>end:[{end}]</label>
+        <button id="editEnd" onClick={this.buttonClick}>{editEnd ? "click a cell" : "click to edit end"}</button>
+        <button id="createWall" onClick={this.buttonClick}>{createWall ? "turn off wall creation" : "click to create walls"}</button>
         <button id="clearWalls" onClick={this.clearWalls}>clear walls</button>
 
-        <img src={Logo} alt="website logo" />
         <form>
           <div className="radio">
-            <label className={this.state.selectedOption == "aStar" ? "selected" : null} >
-              <input type="radio" value="aStar" onChange={this.optionChange} checked={this.state.selectedOption === 'aStar'} />
+            <label className={selectedOption == "aStar" ? "selected" : null} >
+              <input type="radio" value="aStar" onChange={this.optionChange} checked={selectedOption === 'aStar'} />
               A* algorithm
             </label>
           </div>
           <div className="radio">
-            <label className={this.state.selectedOption == "BFS" ? "selected" : null} >
-              <input type="radio" value="BFS" onChange={this.optionChange} checked={this.state.selectedOption === 'BFS'} />
+            <label className={selectedOption == "BFS" ? "selected" : null} >
+              <input type="radio" value="BFS" onChange={this.optionChange} checked={selectedOption === 'BFS'} />
               Breadth first Search Algorithm
             </label>
           </div>
@@ -147,9 +153,10 @@ export default class board extends Component{
 
         <table className="maze">
         <tbody>
-          {this.state.boardState.map((line,row_index) =>{
+          {boardState.map((line,row_index) =>{
           return <tr  key={row_index} className="line">{line.map((block,index)=>{
-                  return <Cell key={index} loc={[row_index,index]} style={{backgroundColor: block ? block : null}} onClick={this.clickedCell.bind(this)} block={block}/>
+                  let loc = row_index+","+index
+                  return <Cell classN={start == loc || end == loc ? "node" : null} loc={loc} start={start} end={end} style={{backgroundColor: block ? block : null}} onClick={this.clickedCell.bind(this)} block={block}/>
               })}</tr>
           }) }
           </tbody>

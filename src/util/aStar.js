@@ -17,7 +17,6 @@ export default function aStar(maze, start, end) {
   while (open_list.length > 0) {
     let currentNode = open_list[0]
     let currentIndex = 0
-    console.log(currentNode, open_list,"current");
     open_list.forEach(function (value, i) {
       if (value.f < currentNode.f) {
         currentNode = value
