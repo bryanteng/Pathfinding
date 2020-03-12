@@ -1,21 +1,20 @@
-import React, { Component } from 'react'
+import React from 'react'
 
-export default class Cell extends Component{
-  render(){
-    const {key, loc, block} = this.props
+const Cell= ({loc, block, start, end, classN, onClick}) =>{
     if(block){
-      var color = ""
       if(block == "O"){
-        color = "LimeGreen"
+        classN = "path"
       }else if(block == "x"){
-        color = "#C80003"
+        classN = "closed"
       }else if(block == "W"){
-        color = "Black"
-        var classN = "bar"
+         classN = "bar"
+      }else if (block == "S" || block == "E"){
+        // classN = "node"
       }
     }
     return(
-      <td className={classN ? classN : null} key={key} loc={loc} style={{backgroundColor: color ? color : null}} onClick={this.props.onClick}>{block}</td>
+      <td className={classN ? classN: null} key={loc} loc={loc} onClick={onClick}>{block}</td>
     )
   }
-}
+
+export default Cell
