@@ -29,12 +29,17 @@ export default class board extends Component{
                 [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]]
     }
 
-    componentDidMount(){
-      Math.floor(Math.random*10)
-    }
+    // componentDidMount(){
+      // Math.floor(Math.random()*10)
+    // }
 
   change_coord = (event) =>{
-    const val = (event.target.validity.valid) ? event.target.value : this.state[event.target.id]
+    let val = (event.target.validity.valid) ? event.target.value : this.state[event.target.id]
+    if(val<= 5){
+      val = 5
+    }else if( val > 20){
+      val = 20
+    }
     this.clearWalls()
     this.setState({[event.target.id]: +val},()=>{
       let board = this.cleanBoard()
@@ -111,45 +116,39 @@ export default class board extends Component{
     this.setState({selectedOption: event.target.value})
   }
 
-
   render(){
     console.log(this.state)
     const {x_coord, y_coord, start, end, editStart, editEnd, createWall, selectedOption, boardState} = this.state
     return(
       <div>
         <h1> Pathfinding </h1>
-        <label >number of rows: </label>
-        <input type="text" pattern="[0-9]*" value={x_coord} id="x_coord" onChange={this.change_coord}></input>
-        <img src={Logo} alt="website logo" />
-        <label >number of columns: </label>
-        <input type="text" pattern="[0-9]*" value={y_coord} id="y_coord" onChange={this.change_coord}></input>
-        <img src={Logo} alt="website logo" />
-        <label>start:[{start}]</label>
-        <button id="editStart" onClick={this.buttonClick}>{editStart ? "click a cell" : "click to edit start"}</button>
-        <img src={Logo} alt="website logo" />
-        <label>end:[{end}]</label>
-        <button id="editEnd" onClick={this.buttonClick}>{editEnd ? "click a cell" : "click to edit end"}</button>
+        {/*<label> number of rows: </label> */}
+        <input className="field" type="text" pattern="[0-9]*" value={x_coord} id="x_coord" onChange={this.change_coord}></input>
+        {/* <label> number of columns: </label>  */}x 
+        <input className="field" type="text" pattern="[0-9]*" value={y_coord} id="y_coord" onChange={this.change_coord}></input>
+        <label> start:</label>
+        <label className={editStart? "editing" : "editable"} id="editStart" src="click to change" onClick={this.buttonClick}> [{start}] </label>
+        <label>end:</label>
+        <label className={editEnd? "editing" : "editable"} id="editEnd" src="click to change" onClick={this.buttonClick}> [{end}] </label>
         <button id="createWall" onClick={this.buttonClick}>{createWall ? "turn off wall creation" : "click to create walls"}</button>
-        <button id="clearWalls" onClick={this.clearWalls}>clear walls</button>
-
         <form>
           <div className="radio">
             <label className={selectedOption == "aStar" ? "selected" : null} >
               <input type="radio" value="aStar" onChange={this.optionChange} checked={selectedOption === 'aStar'} />
-              A* algorithm
+              A* Algorithm
             </label>
           </div>
           <div className="radio">
             <label className={selectedOption == "BFS" ? "selected" : null} >
               <input type="radio" value="BFS" onChange={this.optionChange} checked={selectedOption === 'BFS'} />
-              Breadth first Search Algorithm
+              Breadth First Search Algorithm
             </label>
           </div>
         </form>
 
         <button id="solve" onClick={this.solveClick}>solve path</button>
         <button id="reset" onClick={this.resetClick}>reset board</button>
-
+        <button id="clearWalls" onClick={this.clearWalls}>clear walls</button>
 
         <table className="maze">
         <tbody>
