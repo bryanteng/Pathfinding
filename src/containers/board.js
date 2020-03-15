@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import Logo from "../edit_icon.png"
 import BFS from '../util/BFS'
+import DFS from '../util/DFS'
+
 import aStar from '../util/aStar'
 
 import Cell from '../components/cell'
@@ -35,8 +37,8 @@ export default class board extends Component{
 
   change_coord = (event) =>{
     let val = (event.target.validity.valid) ? event.target.value : this.state[event.target.id]
-    if(val<= 5){
-      val = 5
+    if(val<= 1){
+      val = 1
     }else if( val > 20){
       val = 20
     }
@@ -83,6 +85,8 @@ export default class board extends Component{
       board = aStar(this.cleanBoard(), start, end)
     }else if(this.state.selectedOption == "BFS"){
       board = BFS(this.cleanBoard(), start, end)
+    }else if(this.state.selectedOption == "DFS"){
+      board = DFS(this.cleanBoard(), start, end)
     }
     board[start[0]][start[1]] = "S"
     board[end[0]][end[1]] = "E"
@@ -124,7 +128,7 @@ export default class board extends Component{
         <h1> Pathfinding </h1>
         {/*<label> number of rows: </label> */}
         <input className="field" type="text" pattern="[0-9]*" value={x_coord} id="x_coord" onChange={this.change_coord}></input>
-        {/* <label> number of columns: </label>  */}x 
+        {/* <label> number of columns: </label>  */}x
         <input className="field" type="text" pattern="[0-9]*" value={y_coord} id="y_coord" onChange={this.change_coord}></input>
         <label> start:</label>
         <label className={editStart? "editing" : "editable"} id="editStart" src="click to change" onClick={this.buttonClick}> [{start}] </label>
@@ -142,6 +146,12 @@ export default class board extends Component{
             <label className={selectedOption == "BFS" ? "selected" : null} >
               <input type="radio" value="BFS" onChange={this.optionChange} checked={selectedOption === 'BFS'} />
               Breadth First Search Algorithm
+            </label>
+          </div>
+          <div className="radio">
+            <label className={selectedOption == "DFS" ? "selected" : null} >
+              <input type="radio" value="DFS" onChange={this.optionChange} checked={selectedOption === 'DFS'} />
+              Depth First Search Algorithm
             </label>
           </div>
         </form>
