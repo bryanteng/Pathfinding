@@ -1,11 +1,11 @@
-import React from 'react';
-import './App.css';
-import Board from './containers/board'
+import React from "react";
+import "./App.css";
+import Homepage from "./containers/homepage";
 
 function App() {
   return (
     <div className="App">
-      <Board/>
+      <Homepage />
     </div>
   );
 }
