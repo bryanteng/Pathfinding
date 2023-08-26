@@ -13,19 +13,26 @@
   pointer-events: none;
 }
 
+.mazePlaceholder {
+    padding-bottom: 100px
+}
+
 .maze {
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  background-color: #d2b3a9;
+  border-collapse: collapse;
+  /* background-color: #d2b3a9; */
 }
 
 tr td {
   border: 1px solid black;
   background-color: #5e646d;
   user-select: none;
+  width: 100vh;
 }
+
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {

@@ -52,7 +52,7 @@ const Cell = ({
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}
     >
-      {value}
+      {value === 0 ? undefined : value}
     </td>
   );
 };
