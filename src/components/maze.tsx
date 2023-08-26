@@ -13,39 +13,32 @@ const Maze = ({ onClick, algoChoice }) => {
   const [isChangingStart, setIsChangingStart] = useState(false);
   const [end, setEnd] = useState(`${board[0].length - 1},${board.length - 1}`);
   const [isChangingEnd, setIsChangingEnd] = useState(false);
+  const [walls, setWalls] = useState([])
   const isValidPos = (x, y) => x >= 0 && x < board[0].length && y >= 0 && y < board.length;
-  const [changeQueue, setChangeQueue] = useState([])
 
   useEffect(() => {
     setCleanBoardState()
     console.log("setCleanBoardState", start, end)
     console.table(board)
-  }, [length, width, start, end]);
 
-  useEffect(() => {
-    for(let i = 0; i < changeQueue.length; i++){
-      const changeInQueue = changeQueue[0]
-      console.log("changeQueue", changeQueue[0])
-      updateNodeValueAtPos(changeInQueue.value, changeInQueue.pos)
-    }
-    setChangeQueue([])
-  }, [changeQueue.length]);
-
+  }, [length, width, start, end, walls.length]);
 
   useEffect(()=> {
-    console.log("board updated", board)
+    console.log("board updated", board, length, width, start,end)
     
-    const [startX, startY] = start.split(",").map(Number)
+    const [startY, startX] = start.split(",").map(Number)
     if(!isValidPos(startX, startY)){
+      console.log("set board start")
       setBoardStartLocation("0,0");
     }
 
-    const [endX, endY] = end.split(",").map(Number);
+    const [endY, endX] = end.split(",").map(Number);
     console.log("end shift", end, isValidPos(endX,endY))
     if (!isValidPos(endX, endY) || end === start) {
-      setBoardEndLocation(`${board[0].length - 1},${board.length - 1}`);
+      setBoardEndLocation(`${+length - 1},${+width - 1}`);
     }
-  }, [board])
+
+  }, [length, width, board])
 
   function useInput({ type }) {
     const [value, setValue] = useState(10);
@@ -70,15 +63,34 @@ const Maze = ({ onClick, algoChoice }) => {
       }
       maze.push(row)
     }
+    const isValidMazePos = (x, y) => x >= 0 && x < maze[0].length && y >= 0 && y < maze.length;
 
-    const [startX, startY] = start.split(",")
-    maze[startX][startY].value = "S"
+    const [startY, startX] = start.split(",")
+    if( isValidMazePos(startX, startY)) maze[startY][startX].value = "S"
+    else {
+        maze[0][0].value = "S"
+        setBoardStartLocation("0,0")
+    } 
 
-    const [endX, endY] = end.split(",");
-    maze[endX][endY].value = "E";
+    const [endY, endX] = end.split(",");
+    if(isValidMazePos(endX, endY)) maze[endY][endX].value = "E" 
+    else {
+      maze[+length-1][+width-1].value = "E"
+      setBoardEndLocation(`${+length-1},${+width-1}`)
+    }
 
+    const validWalls = walls.filter(wall => {
+      const [y,x] = wall.split(",")
+      return isValidMazePos(x,y)
+    })
+
+    for(let i = 0; i < validWalls.length; i++){
+      const [y,x] = validWalls[i].split(",")
+      maze[y][x].value = "W"
+    }
+
+    setWalls(validWalls)
     setBoard(maze);
-
     return maze
   }
 
@@ -88,15 +100,15 @@ const Maze = ({ onClick, algoChoice }) => {
     if(draggable) return // dont want this to work on a start/end node
     const node = getNodeAtPos(event.target.id)
 
-    if(!node) return; // don't add fake changes to change queue
+    if(!node) return; // don't change 
 
-    setChangeQueue((prevChanges) => [
-      ...prevChanges,
-      {
-        value: "x",
-        pos: id 
-      }
-    ]);
+    updateNodeValueAtPos("W", id)
+
+      setWalls(prevWalls => {
+          const walls = [...prevWalls, id];
+          return walls;
+      })
+
     setBoard(board)
   };
 
@@ -136,6 +148,7 @@ const Maze = ({ onClick, algoChoice }) => {
     if (isValidPos(x, y)) {
       setStart(newStartLocation)
       updateNodeValueAtPos("S", newStartLocation);
+      // addChangeToChangeQueue({value:"S", pos: newStartLocation});
       if (prevNode) prevNode.value = 0
 
     }
@@ -144,14 +157,13 @@ const Maze = ({ onClick, algoChoice }) => {
   const setBoardEndLocation = (newEndLocation) => {
     console.log("setBoardEndLocation", newEndLocation);
     if(newEndLocation === end) return;
-
     const prevNode = getNodeAtPos(end)
-    console.log("prevNode", prevNode, newEndLocation, getNodeAtPos(newEndLocation));
 
     const [x, y] = newEndLocation.split(",")
     if (isValidPos(x, y)) {
       setEnd(newEndLocation)
-      updateNodeValueAtPos("S", newEndLocation);
+      updateNodeValueAtPos("E", newEndLocation);
+
       if (prevNode) prevNode.value = 0
 
     }
@@ -186,14 +198,14 @@ const Maze = ({ onClick, algoChoice }) => {
   const updateNodeValueAtPos = (value, pos: string) => {
     const [x, y] = pos.split(",")
     if(isValidPos(x,y)){
-      const maze = board.slice()
-      maze[x][y].value = value
-      console.table(maze.map(row => row.map(x => x.value)))
-
-      setBoard(maze)
-      return getNodeAtPos(pos)
+        setBoard(prevBoard => {
+            console.table(prevBoard.map(row => row.map(x => x.value)))
+            const board = [...prevBoard];
+            board[x][y].value = value;
+            console.table(board.map(row => row.map(x => x.value)))
+            return board;
+        })
     }
-
     return undefined
   }
 
@@ -204,18 +216,32 @@ const Maze = ({ onClick, algoChoice }) => {
       .join(",")
   }
 
+  const clearWalls = () => {
+    setWalls([])
+  }
+
   return (
-    <div>
+    <div className="mazePlaceholder">
       {lengthInput}x{widthInput} <br />
       start: {reverseDisplay(start)} end: {reverseDisplay(end)}
       <button onClick={solveClick}> solve </button>
       <button onClick={setCleanBoardState}> clear </button>
+      <button onClick={clearWalls}> clear walls</button>
+
       <button onClick={mapClick}> log map </button>
       <table className="maze">
+          <thead>
+              <tr>
+                  <th></th>
+                  {Array.from({ length: +width }, (_, index) => (
+                      <th key={index}>{index+1}</th>
+                  ))}
+              </tr>
+          </thead>
         <tbody>
           {board.map((line, row_index) => {
             return (
-              <tr key={row_index} className="line">
+                <tr key={row_index} className="line"> <span>{row_index + 1}</span>
                 {line.map(node => (
                   <Cell
                     key={node.pos}
