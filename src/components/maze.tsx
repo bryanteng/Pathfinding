@@ -13,7 +13,7 @@ const Maze = ({ onClick, algoChoice }) => {
   const [isChangingStart, setIsChangingStart] = useState(false);
   const [end, setEnd] = useState(`${board[0].length - 1},${board.length - 1}`);
   const [isChangingEnd, setIsChangingEnd] = useState(false);
-  const [walls, setWalls] = useState([])
+  const [walls, setWalls] = useState(new Set<string>())
   const isValidPos = (x, y) => x >= 0 && x < board[0].length && y >= 0 && y < board.length;
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const Maze = ({ onClick, algoChoice }) => {
     console.log("setCleanBoardState", start, end)
     console.table(board)
 
-  }, [length, width, start, end, walls.length]);
+  }, [length, width, start, end, walls.size]);
 
   useEffect(()=> {
     console.log("board updated", board, length, width, start,end)
@@ -65,28 +65,27 @@ const Maze = ({ onClick, algoChoice }) => {
     }
     const isValidMazePos = (x, y) => x >= 0 && x < maze[0].length && y >= 0 && y < maze.length;
 
+    const validWalls = new Set<string>()
+    walls.forEach(wall => {
+      const [y,x] = wall.split(",")
+      if(isValidMazePos(x,y)){
+        maze[y][x].value = "W"
+        validWalls.add(wall)
+      }
+    })
+
     const [startY, startX] = start.split(",")
-    if( isValidMazePos(startX, startY)) maze[startY][startX].value = "S"
+    if (isValidMazePos(startX, startY)) maze[startY][startX].value = "S"
     else {
         maze[0][0].value = "S"
         setBoardStartLocation("0,0")
-    } 
-
-    const [endY, endX] = end.split(",");
-    if(isValidMazePos(endX, endY)) maze[endY][endX].value = "E" 
-    else {
-      maze[+length-1][+width-1].value = "E"
-      setBoardEndLocation(`${+length-1},${+width-1}`)
     }
 
-    const validWalls = walls.filter(wall => {
-      const [y,x] = wall.split(",")
-      return isValidMazePos(x,y)
-    })
-
-    for(let i = 0; i < validWalls.length; i++){
-      const [y,x] = validWalls[i].split(",")
-      maze[y][x].value = "W"
+    const [endY, endX] = end.split(",");
+    if (isValidMazePos(endX, endY)) maze[endY][endX].value = "E"
+    else {
+        maze[+length - 1][+width - 1].value = "E"
+        setBoardEndLocation(`${+length - 1},${+width - 1}`)
     }
 
     setWalls(validWalls)
@@ -95,19 +94,24 @@ const Maze = ({ onClick, algoChoice }) => {
   }
 
   const onCellClick = (event) => {
-    console.log(event.target.id);
     const { id, draggable} = event.target
     if(draggable) return // dont want this to work on a start/end node
-    const node = getNodeAtPos(event.target.id)
-
+    const node = getNodeAtPos(event.target.id, true)
+      console.log(event.target.id, node, node.value, walls);
     if(!node) return; // don't change 
+    if(node.value === "S" || node.value === "E") return // dont change if start or end
 
-    updateNodeValueAtPos("W", id)
-
+    if(node.value === "W"){
+      console.log("currWalls", walls, id)
       setWalls(prevWalls => {
-          const walls = [...prevWalls, id];
-          return walls;
+        prevWalls.delete(id)
+        return new Set(prevWalls)
       })
+      updateNodeValueAtPos(0, id)
+    } else {
+      setWalls(prevWalls => new Set(prevWalls.add(id)))
+      updateNodeValueAtPos("W", id)
+    }
 
     setBoard(board)
   };
@@ -217,7 +221,7 @@ const Maze = ({ onClick, algoChoice }) => {
   }
 
   const clearWalls = () => {
-    setWalls([])
+    setWalls(new Set())
   }
 
   return (

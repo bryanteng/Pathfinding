@@ -31,7 +31,7 @@ tr td {
   background-color: #5e646d;
   user-select: none;
   width: 100vh;
-}
+} /* TODO add cell classes to inherit from this */
 
 
 @media (prefers-reduced-motion: no-preference) {
@@ -112,7 +112,7 @@ tr td {
 }
 
 .bar {
-  width: inherit;
+  width: 100vh;
   background: #6fd967;
   background-color: Black;
   background-image: linear-gradient(
