@@ -43,24 +43,24 @@ export default function aStar(maze: Node[][], start: Node, end: Node, setBoard) 
       currentNode.x === endNode.x
     ) {
       console.log("currentNode", currentNode)
-      currentNode.value = "W"
-      setBoard(maze)
-      // setInterval(() => {
-      //   let path = [];
-      //   let current = currentNode;
-      //   while (current) {
-      //     path.push(current);
-      //     current = current.parent;
-      //   }
-      //   for (let node of open_list) {
-      //     node.setValue("x");
-      //   }
-      //   for (let node of path) {
-      //     node.setValue(0);
-      //   }
-      //   setBoard(maze);
-      //   console.table(maze);
-      // }, 1000);
+      // setBoard(maze)
+      setInterval(() => {
+        let path = [];
+        let current = currentNode;
+        while (current) {
+          path.push(current);
+          current = current.parent;
+        }
+        for (let node of open_list) {
+          node.value = "x";
+        }
+        for (let node of path) {
+          node.value = "0";
+          setBoard(node.pos)
+        }
+        // setBoard(maze);
+        console.table(maze);
+      }, 1000);
 
       return maze;
     }
@@ -109,7 +109,7 @@ export default function aStar(maze: Node[][], start: Node, end: Node, setBoard) 
         }
         open_list.push(child);
         currentNode.value = "x"
-        setBoard(maze);
+        // setBoard(maze);
       }
     }
   }
