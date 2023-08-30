@@ -14,6 +14,7 @@ const Maze = ({ onClick, algoChoice }) => {
   const [end, setEnd] = useState(`${board[0].length - 1},${board.length - 1}`);
   const [isChangingEnd, setIsChangingEnd] = useState(false);
   const [walls, setWalls] = useState(new Set<string>())
+  const [path, setPaths] = useState([])
   const isValidPos = (x, y) => x >= 0 && x < board[0].length && y >= 0 && y < board.length;
 
   useEffect(() => {
@@ -51,6 +52,16 @@ const Maze = ({ onClick, algoChoice }) => {
 
     const input = <input value={value} onChange={e => handleChange(+e.target.value)} type={type} />;
     return [value, input];
+  }
+
+  const addPath = (pos) => {
+    const maze: Node[][] = board.slice()
+    path.forEach(step =>{
+      const [y,x] = step.split(",")
+      maze[y][x].value = "0"
+    })
+    setPaths([...path, pos])
+    setBoard(maze)
   }
 
   const setCleanBoardState = () => {
@@ -96,13 +107,12 @@ const Maze = ({ onClick, algoChoice }) => {
   const onCellClick = (event) => {
     const { id, draggable} = event.target
     if(draggable) return // dont want this to work on a start/end node
-    const node = getNodeAtPos(event.target.id, true)
-      console.log(event.target.id, node, node.value, walls);
-    if(!node) return; // don't change 
+    const node = getNodeAtPos(event.target.id)
+
+    if(!node) return; // don't change if node doesnt exist
     if(node.value === "S" || node.value === "E") return // dont change if start or end
 
     if(node.value === "W"){
-      console.log("currWalls", walls, id)
       setWalls(prevWalls => {
         prevWalls.delete(id)
         return new Set(prevWalls)
@@ -148,11 +158,10 @@ const Maze = ({ onClick, algoChoice }) => {
     if(newStartLocation === start) return
     const prevNode = getNodeAtPos(start)
 
-    const [x, y] = newStartLocation.split(",")
+    const [y, x] = newStartLocation.split(",")
     if (isValidPos(x, y)) {
       setStart(newStartLocation)
       updateNodeValueAtPos("S", newStartLocation);
-      // addChangeToChangeQueue({value:"S", pos: newStartLocation});
       if (prevNode) prevNode.value = 0
 
     }
@@ -163,7 +172,7 @@ const Maze = ({ onClick, algoChoice }) => {
     if(newEndLocation === end) return;
     const prevNode = getNodeAtPos(end)
 
-    const [x, y] = newEndLocation.split(",")
+    const [y, x] = newEndLocation.split(",")
     if (isValidPos(x, y)) {
       setEnd(newEndLocation)
       updateNodeValueAtPos("E", newEndLocation);
@@ -176,7 +185,7 @@ const Maze = ({ onClick, algoChoice }) => {
   const solveClick = () => {
     console.log("*** solve", getNodeAtPos(start), getNodeAtPos(end), board);
     setCleanBoardState()
-    aStar(board, getNodeAtPos(start), getNodeAtPos(end), setBoard);
+    aStar(board, getNodeAtPos(start), getNodeAtPos(end), addPath);
     console.log(board);
   };
 
@@ -186,26 +195,21 @@ const Maze = ({ onClick, algoChoice }) => {
   }
 
   const getNodeAtPos = (pos: string, reverse: boolean = false): Node => {
-    const [x,y] = pos.split(",")
+    const [y,x] = pos.split(",")
     if(isValidPos(x,y)){
-      if(!reverse){
-        const nodeAtPos = board[y][x]
-        if (nodeAtPos) return nodeAtPos
-      } else {
-        const nodeAtPos = board[x][y]
-        if (nodeAtPos) return nodeAtPos
-      }
+      const nodeAtPos = board[y][x]
+      if (nodeAtPos) return nodeAtPos
     }
     return undefined
   }
 
   const updateNodeValueAtPos = (value, pos: string) => {
-    const [x, y] = pos.split(",")
+    const [y, x] = pos.split(",")
     if(isValidPos(x,y)){
         setBoard(prevBoard => {
             console.table(prevBoard.map(row => row.map(x => x.value)))
             const board = [...prevBoard];
-            board[x][y].value = value;
+            board[y][x].value = value;
             console.table(board.map(row => row.map(x => x.value)))
             return board;
         })
