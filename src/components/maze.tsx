@@ -3,6 +3,12 @@ import Cell from "../components/cell";
 import aStar from "../util/aStar";
 import Node from "../classes/Node"
 
+
+interface Path {
+    x: string,
+    y: string
+}
+
 const Maze = ({ onClick, algoChoice }) => {
   const [board, setBoard] = useState([
     [new Node("0,0",0)]
@@ -19,22 +25,18 @@ const Maze = ({ onClick, algoChoice }) => {
 
   useEffect(() => {
     setCleanBoardState()
-    console.log("setCleanBoardState", start, end)
-    console.table(board)
+  }, [length, width, start, end, walls.size, path.length]);
 
-  }, [length, width, start, end, walls.size]);
 
   useEffect(()=> {
     console.log("board updated", board, length, width, start,end)
     
     const [startY, startX] = start.split(",").map(Number)
     if(!isValidPos(startX, startY)){
-      console.log("set board start")
       setBoardStartLocation("0,0");
     }
 
     const [endY, endX] = end.split(",").map(Number);
-    console.log("end shift", end, isValidPos(endX,endY))
     if (!isValidPos(endX, endY) || end === start) {
       setBoardEndLocation(`${+length - 1},${+width - 1}`);
     }
@@ -54,17 +56,39 @@ const Maze = ({ onClick, algoChoice }) => {
     return [value, input];
   }
 
-  const addPath = (pos) => {
-    const maze: Node[][] = board.slice()
-    path.forEach(step =>{
-      const [y,x] = step.split(",")
-      maze[y][x].value = "0"
-    })
-    setPaths([...path, pos])
-    setBoard(maze)
+  // const addPath = (newPathCoords) => {
+  //   console.log("in addPath", newPathCoords)
+  //   const newPath = []
+  //   newPathCoords.forEach(step =>{
+  //     newPath.push(getNodeAtPos(`${step.y},${step.x}`))
+  //   })
+  //   setPaths(newPath)
+  // }
+
+  const clearBoard = () => { // clear walls, and paths, leave only start and end positions
+      const maze: Node[][] = []
+      for (let i = 0; i < length; i++) {
+          let row = []
+          for (let j = 0; j < width; j++) {
+              let node = new Node(`${i},${j}`, 0)
+              row.push(node)
+          }
+          maze.push(row)
+      }
+
+      const [startY, startX] = start.split(",")
+      maze[startY][startX].value = "S"
+
+      const [endY, endX] = end.split(",");
+      maze[endY][endX].value = "E"
+
+      setPaths([])
+      setWalls(new Set<string>())
+      setBoard(maze);
+      return maze
   }
 
-  const setCleanBoardState = () => {
+  const setCleanBoardState = (prevPath: Path[]= undefined) => {
     const maze: Node[][] = []
     for(let i = 0; i < length; i++){
       let row = []
@@ -76,13 +100,20 @@ const Maze = ({ onClick, algoChoice }) => {
     }
     const isValidMazePos = (x, y) => x >= 0 && x < maze[0].length && y >= 0 && y < maze.length;
 
+    console.log('setCleanPath', path)
+    if(path.length > 0 ){
+        path.forEach(node => {
+        maze[node.y][node.x].value = "x"
+      })
+    } else prevPath?.forEach(node => maze[node.y][node.x].value = 0)
+
     const validWalls = new Set<string>()
     walls.forEach(wall => {
-      const [y,x] = wall.split(",")
-      if(isValidMazePos(x,y)){
-        maze[y][x].value = "W"
-        validWalls.add(wall)
-      }
+        const [y, x] = wall.split(",")
+        if (isValidMazePos(x, y)) {
+            maze[y][x].value = "W"
+            validWalls.add(wall)
+        }
     })
 
     const [startY, startX] = start.split(",")
@@ -184,8 +215,12 @@ const Maze = ({ onClick, algoChoice }) => {
 
   const solveClick = () => {
     console.log("*** solve", getNodeAtPos(start), getNodeAtPos(end), board);
-    setCleanBoardState()
-    aStar(board, getNodeAtPos(start), getNodeAtPos(end), addPath);
+    setCleanBoardState(path)
+    setPaths([])
+    // console.log("after solve click", aStar(board, getNodeAtPos(start), getNodeAtPos(end), addPath), path)
+      const newPath = aStar(board, getNodeAtPos(start), getNodeAtPos(end))
+      console.log("newPath", newPath, newPath?.length)
+      newPath?.length ? setPaths(newPath) : alert("route not possible")
     console.log(board);
   };
 
@@ -233,7 +268,7 @@ const Maze = ({ onClick, algoChoice }) => {
       {lengthInput}x{widthInput} <br />
       start: {reverseDisplay(start)} end: {reverseDisplay(end)}
       <button onClick={solveClick}> solve </button>
-      <button onClick={setCleanBoardState}> clear </button>
+      <button onClick={clearBoard}> clear </button>
       <button onClick={clearWalls}> clear walls</button>
 
       <button onClick={mapClick}> log map </button>

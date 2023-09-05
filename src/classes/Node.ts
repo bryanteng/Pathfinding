@@ -18,7 +18,7 @@ class Node {
     dist?: number
   ) {
     this.pos = pos;
-    this.g = 0;
+    this.g = parent ? parent.g + 1 : 0;
     this.h = 0;
     this.dist = dist;
     this.visited = visited;
@@ -52,17 +52,13 @@ class Node {
     this._f = f;
   }
 
-  setG = (g: number): void => {
-    this.g = g;
-  };
+  calculateHeuristic(targetX, targetY) {
+    this.h = Math.abs(targetX - this.x) + Math.abs(targetY - this.y);
+  }
 
-  setH = (h: number): void => {
-    this.h = h;
-  };
-
-  setF = (f: number): void => {
-    this.f = f;
-  };
+  getF() {
+    return this.g + this.h;
+  }
 }
 
 export default Node;
