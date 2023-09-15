@@ -1,18 +1,18 @@
 class Node {
-  public _f: number = 0;
   _parent: Node = undefined;
   pos: string;
   g?: number;
   h?: number;
+  f?: number = 0;
   dist?: number;
-  visited?: boolean;
+  _visited?: boolean;
   _value: string | number = 0;
   x: number;
   y: number;
 
   constructor(
     pos: string,
-    _value: string | number,
+    value: string | number,
     visited: boolean = false,
     parent?: Node,
     dist?: number
@@ -21,8 +21,8 @@ class Node {
     this.g = parent ? parent.g + 1 : 0;
     this.h = 0;
     this.dist = dist;
-    this.visited = visited;
-    this._value = _value;
+    this._visited = visited;
+    this._value = value;
     this._parent = parent;
     this.x = parseInt(this.pos.split(",")[1]);
     this.y = parseInt(this.pos.split(",")[0]);
@@ -44,13 +44,14 @@ class Node {
     this._parent = parent;
   };
 
-  get f(): number {
-    return this._f;
+  get visited(): boolean {
+    return this._visited
   }
 
-  set f(f: number) {
-    this._f = f;
+  set visited(visited: boolean) {
+    this._visited = visited
   }
+
 
   calculateHeuristic(targetX, targetY) {
     this.h = Math.abs(targetX - this.x) + Math.abs(targetY - this.y);
