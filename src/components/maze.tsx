@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Cell from "../components/cell";
 import aStar from "../util/aStar";
+import DFS from "../util/DFS";
 import Node from "../classes/Node"
 
 
@@ -207,19 +208,22 @@ const Maze = ({ onClick, algoChoice }) => {
     console.log("*** solve", getNodeAtPos(start), getNodeAtPos(end), board);
     setCleanBoardState(path)
     setPaths([])
-      const results = aStar(board, getNodeAtPos(start), getNodeAtPos(end))
+      // const results = aStar(board, getNodeAtPos(start), getNodeAtPos(end))
+      const results = DFS(board, getNodeAtPos(start), getNodeAtPos(end))
+
       const newPath = results[0]
       console.log("results", results)
       if(newPath?.length) {
         let index = 0
-        while(index < newPath.length){
-          const currPath = newPath.slice(0,index)
-          setTimeout(() => {
-              setPaths(currPath)
-              index++
-          }, 100);
-        }
-        // setPaths(newPath) 
+        // while(index < newPath.length){
+        //   const currPath = newPath.slice(0,index)
+
+        //   setTimeout(() => {
+        //       setPaths(currPath)
+        //       index++
+        //   }, 100);
+        // }
+        setPaths(newPath) 
       }
       else alert("route not possible")
       // const newBoard = results[1]
