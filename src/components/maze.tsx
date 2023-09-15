@@ -56,15 +56,6 @@ const Maze = ({ onClick, algoChoice }) => {
     return [value, input];
   }
 
-  // const addPath = (newPathCoords) => {
-  //   console.log("in addPath", newPathCoords)
-  //   const newPath = []
-  //   newPathCoords.forEach(step =>{
-  //     newPath.push(getNodeAtPos(`${step.y},${step.x}`))
-  //   })
-  //   setPaths(newPath)
-  // }
-
   const clearBoard = () => { // clear walls, and paths, leave only start and end positions
       const maze: Node[][] = []
       for (let i = 0; i < length; i++) {
@@ -100,7 +91,6 @@ const Maze = ({ onClick, algoChoice }) => {
     }
     const isValidMazePos = (x, y) => x >= 0 && x < maze[0].length && y >= 0 && y < maze.length;
 
-    console.log('setCleanPath', path)
     if(path.length > 0 ){
         path.forEach(node => {
         maze[node.y][node.x].value = "x"
@@ -217,16 +207,32 @@ const Maze = ({ onClick, algoChoice }) => {
     console.log("*** solve", getNodeAtPos(start), getNodeAtPos(end), board);
     setCleanBoardState(path)
     setPaths([])
-    // console.log("after solve click", aStar(board, getNodeAtPos(start), getNodeAtPos(end), addPath), path)
-      const newPath = aStar(board, getNodeAtPos(start), getNodeAtPos(end))
-      console.log("newPath", newPath, newPath?.length)
-      newPath?.length ? setPaths(newPath) : alert("route not possible")
+      const results = aStar(board, getNodeAtPos(start), getNodeAtPos(end))
+      const newPath = results[0]
+      console.log("results", results)
+      if(newPath?.length) {
+        let index = 0
+        while(index < newPath.length){
+          const currPath = newPath.slice(0,index)
+          setTimeout(() => {
+              setPaths(currPath)
+              index++
+          }, 100);
+        }
+        // setPaths(newPath) 
+      }
+      else alert("route not possible")
+      // const newBoard = results[1]
+      // newBoard.push([])
+      // setBoard(newBoard)
     console.log(board);
   };
 
   const mapClick = () => {
     const maze = board.map(row => row.map(val => val.value ))
     console.table(maze)
+      const maze2 = board.map(row => row.map(val => val.visited))
+      console.table(maze2)
   }
 
   const getNodeAtPos = (pos: string, reverse: boolean = false): Node => {
