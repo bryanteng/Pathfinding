@@ -3,6 +3,8 @@ import Cell from "../components/cell";
 import aStar from "../util/aStar";
 import DFS from "../util/DFS";
 import BFS from "../util/BFS";
+import UCS from "../util/UCS";
+
 
 import Node from "../classes/Node"
 
@@ -211,7 +213,7 @@ const Maze = ({ onClick, algoChoice }) => {
     setCleanBoardState(path)
     setPaths([])
       // const results = aStar(board, getNodeAtPos(start), getNodeAtPos(end))
-      const results = BFS(board, getNodeAtPos(start), getNodeAtPos(end))
+      const results = UCS(board, getNodeAtPos(start), getNodeAtPos(end))
 
       const newPath = results[0]
       console.log("results", results)
