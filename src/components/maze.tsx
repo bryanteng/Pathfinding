@@ -207,33 +207,24 @@ const Maze = ({ onClick, algoChoice }) => {
 
     }
   };
+  const solveClick = async () => {
+    setCleanBoardState(path);
+    setPaths([]);
 
-  const solveClick = () => {
-    console.log("*** solve", getNodeAtPos(start), getNodeAtPos(end), board);
-    setCleanBoardState(path)
-    setPaths([])
-      // const results = aStar(board, getNodeAtPos(start), getNodeAtPos(end))
-      const results = UCS(board, getNodeAtPos(start), getNodeAtPos(end))
+    const results = await UCS(board, getNodeAtPos(start), getNodeAtPos(end));
+    const newPath = results[0];
 
-      const newPath = results[0]
-      console.log("results", results)
-      if(newPath?.length) {
-        let index = 0
-        // while(index < newPath.length){
-        //   const currPath = newPath.slice(0,index)
+    if (newPath?.length) {
+      for (let index = 0; index < newPath.length; index++) {
+        const currPath = newPath.slice(0, index + 1);
 
-        //   setTimeout(() => {
-        //       setPaths(currPath)
-        //       index++
-        //   }, 100);
-        // }
-        setPaths(newPath) 
+        setTimeout(() => {
+          setPaths(currPath);
+        }, 100 * index);
       }
-      else alert("route not possible")
-      // const newBoard = results[1]
-      // newBoard.push([])
-      // setBoard(newBoard)
-    console.log(board);
+    } else {
+      alert("Route not possible");
+    }
   };
 
   const mapClick = () => {
