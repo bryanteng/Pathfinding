@@ -26,6 +26,7 @@ const Maze = ({ onClick, algoChoice }) => {
   const [isChangingEnd, setIsChangingEnd] = useState(false);
   const [walls, setWalls] = useState(new Set<string>())
   const [path, setPaths] = useState([])
+  const [executionTime, setExecutionTime] = useState(0);
   const isValidPos = (x, y) => x >= 0 && x < board[0].length && y >= 0 && y < board.length;
 
   useEffect(() => {
@@ -207,12 +208,21 @@ const Maze = ({ onClick, algoChoice }) => {
 
     }
   };
-  const solveClick = async () => {
-    setCleanBoardState(path);
-    setPaths([]);
 
-    const results = await UCS(board, getNodeAtPos(start), getNodeAtPos(end));
+  const solveClick = async () => {
+    setCleanBoardState();
+    setPaths([]);
+    setExecutionTime(0); // Reset the execution time
+
+    const startTime = performance.now(); // Start measuring time
+
+    const results = await aStar(board, getNodeAtPos(start), getNodeAtPos(end));
     const newPath = results[0];
+
+    const endTime = performance.now(); // Stop measuring time
+    const totalTime = endTime - startTime;
+
+    setExecutionTime(totalTime); // Set the execution time
 
     if (newPath?.length) {
       for (let index = 0; index < newPath.length; index++) {
@@ -226,6 +236,7 @@ const Maze = ({ onClick, algoChoice }) => {
       alert("Route not possible");
     }
   };
+
 
   const mapClick = () => {
     const maze = board.map(row => row.map(val => val.value ))
@@ -275,6 +286,7 @@ const Maze = ({ onClick, algoChoice }) => {
       <button onClick={solveClick}> solve </button>
       <button onClick={clearBoard}> clear </button>
       <button onClick={clearWalls}> clear walls</button>
+      <p>Execution Time: {executionTime.toFixed(2)} milliseconds</p>
 
       <button onClick={mapClick}> log map </button>
       <table className="maze">
