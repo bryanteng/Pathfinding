@@ -12,7 +12,6 @@ export default function aStar(grid: Node[][], start: Node, end: Node) {
     if (currentNode.x == end.x && currentNode.y == end.y) {
       const path = [];
       let current = currentNode;
-      console.log("aStar maze", grid)
       while (current) {
         if( !(current.x === start.x && current.y === start.y) && !(end.x === current.x && end.y === current.y) ) path.unshift({ x: current.x, y: current.y });
         current = current.parent;

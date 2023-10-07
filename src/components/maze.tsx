@@ -3,6 +3,7 @@ import Cell from "../components/cell";
 import aStar from "../util/aStar";
 import DFS from "../util/DFS";
 import BFS from "../util/BFS";
+import GBFS from "../util/GBFS";
 import UCS from "../util/UCS";
 import Node from "../classes/Node"
 import '../styles/maze.css'
@@ -19,7 +20,7 @@ interface SearchAlgorithm {
   executionTime?: string; // Optional property to store the execution time
 }
 
-const Maze = ({ onClick, algoChoice }) => {
+const Maze = () => {
   const [board, setBoard] = useState([
     [new Node("0,0",0)]
   ]);
@@ -42,12 +43,20 @@ const Maze = ({ onClick, algoChoice }) => {
       execute: () => Promise.resolve(aStar(board, getNodeAtPos(start), getNodeAtPos(end))),
     },
     {
-      name: 'DFS Algorithm',
+      name: 'Depth First Search Algorithm',
       execute: () => Promise.resolve(DFS(board, getNodeAtPos(start), getNodeAtPos(end))),
     },
     {
-      name: 'BFS Algorithm',
+      name: 'Breadth First Search Algorithm',
       execute: () => Promise.resolve(BFS(board, getNodeAtPos(start), getNodeAtPos(end))),
+    },
+    {
+      name: 'Greedy Breadth First Search Algorithm',
+      execute: () => Promise.resolve(GBFS(board, getNodeAtPos(start), getNodeAtPos(end))),
+    },
+    {
+      name: 'Uniform Cost Search Algorithm',
+      execute: () => Promise.resolve(UCS(board, getNodeAtPos(start), getNodeAtPos(end))),
     },
     // Add more search algorithms and execution functions
   ];
@@ -58,8 +67,6 @@ const Maze = ({ onClick, algoChoice }) => {
 
 
   useEffect(()=> {
-    console.log("board updated", board, length, width, start,end)
-    
     const [startY, startX] = start.split(",").map(Number)
     if(!isValidPos(startX, startY)){
       setBoardStartLocation("0,0");
@@ -85,28 +92,26 @@ const Maze = ({ onClick, algoChoice }) => {
     return [value, input];
   }
 
-  const clearBoard = () => { // clear walls, and paths, leave only start and end positions
-      const maze: Node[][] = []
-      for (let i = 0; i < length; i++) {
-          let row = []
-          for (let j = 0; j < width; j++) {
-              let node = new Node(`${i},${j}`, 0)
-              row.push(node)
-          }
-          maze.push(row)
-      }
+  const clearBoard = () => {
+    const newBoard = board.map((row) =>
+      row.map((node) => {
+        if (node.value === "W") {
+          return new Node(node.pos, "W");
+        }
+        if (node.value === "S") {
+          return new Node(node.pos, "S");
+        }
+        if (node.value === "E") {
+          return new Node(node.pos, "E");
+        }
+        return new Node(node.pos, 0);
+      })
+    );
 
-      const [startY, startX] = start.split(",")
-      maze[startY][startX].value = "S"
-
-      const [endY, endX] = end.split(",");
-      maze[endY][endX].value = "E"
-
-      setPaths([])
-      setWalls(new Set<string>())
-      setBoard(maze);
-      return maze
-  }
+    setPaths([]);
+    setBoard(newBoard);
+    return newBoard;
+  };
 
   const setCleanBoardState = (prevPath: Path[]= undefined) => {
     const maze: Node[][] = []
@@ -189,7 +194,6 @@ const Maze = ({ onClick, algoChoice }) => {
 
   const onMouseUp = (event) => {
     const newLocation = event.target.id;
-    console.log("mouseUp", event.target.draggable)
     if (!isChangingStart && !isChangingEnd) return;
     if (newLocation && event.target.draggable === false) {
       if (isChangingStart) {
@@ -204,7 +208,6 @@ const Maze = ({ onClick, algoChoice }) => {
   };
 
   const setBoardStartLocation = (newStartLocation) => {
-    console.log("setBoardStartLocation", newStartLocation);
     if(newStartLocation === start) return
     const prevNode = getNodeAtPos(start)
 
@@ -218,7 +221,6 @@ const Maze = ({ onClick, algoChoice }) => {
   };
 
   const setBoardEndLocation = (newEndLocation) => {
-    console.log("setBoardEndLocation", newEndLocation);
     if(newEndLocation === end) return;
     const prevNode = getNodeAtPos(end)
 
@@ -265,19 +267,12 @@ const Maze = ({ onClick, algoChoice }) => {
       }
 
       // Force a re-render to update the execution times and board
-      setRerender((prev) => prev + 1);
+      // setRerender((prev) => prev + 1);
     }
 
     // Update the state with the complete execution times string
     setExecutionTimesString(executionTimesStr);
   };
-
-  const mapClick = () => {
-    const maze = board.map(row => row.map(val => val.value ))
-    console.table(maze)
-      const maze2 = board.map(row => row.map(val => val.visited))
-      console.table(maze2)
-  }
 
   const getNodeAtPos = (pos: string, reverse: boolean = false): Node => {
     const [y,x] = pos.split(",")
@@ -292,10 +287,8 @@ const Maze = ({ onClick, algoChoice }) => {
     const [y, x] = pos.split(",")
     if(isValidPos(x,y)){
         setBoard(prevBoard => {
-            console.table(prevBoard.map(row => row.map(x => x.value)))
             const board = [...prevBoard];
             board[y][x].value = value;
-            console.table(board.map(row => row.map(x => x.value)))
             return board;
         })
     }
@@ -325,6 +318,11 @@ const Maze = ({ onClick, algoChoice }) => {
       <div className="right-column">
         <h2>Search Algorithms</h2>
         <ul>
+          {/* {searchAlgorithms.map((algorithm) => (
+            <li key={algorithm.name}>
+              {algorithm.name}: {algorithm.executionTime ? `${algorithm.executionTime}ms`: 'Calculating...'}
+            </li>
+          ))} */}
           {executionTimesString.split("\n").map(algo =>(
           <li key={algo}>
             {algo}
@@ -332,7 +330,6 @@ const Maze = ({ onClick, algoChoice }) => {
           ))}
         </ul>
       </div>
-      <button onClick={mapClick}> log map </button>
       <table className="maze">
           <thead>
               <tr>
