@@ -34,7 +34,6 @@ const Cell = ({
   const [cellClass, setCellClass] = useState(getCellClass())
 
   useEffect(() => {
-    console.log("cell", value)
     setCellClass(getCellClass())
   }, [value]);
 
