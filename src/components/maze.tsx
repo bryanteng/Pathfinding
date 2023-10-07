@@ -4,14 +4,19 @@ import aStar from "../util/aStar";
 import DFS from "../util/DFS";
 import BFS from "../util/BFS";
 import UCS from "../util/UCS";
-
-
 import Node from "../classes/Node"
-
+import '../styles/maze.css'
 
 interface Path {
     x: string,
     y: string
+}
+
+
+interface SearchAlgorithm {
+  name: string; // The name of the search algorithm
+  execute: () => Promise<any>; // A function that executes the algorithm and returns a promise
+  executionTime?: string; // Optional property to store the execution time
 }
 
 const Maze = ({ onClick, algoChoice }) => {
@@ -26,8 +31,26 @@ const Maze = ({ onClick, algoChoice }) => {
   const [isChangingEnd, setIsChangingEnd] = useState(false);
   const [walls, setWalls] = useState(new Set<string>())
   const [path, setPaths] = useState([])
-  const [executionTime, setExecutionTime] = useState(0);
   const isValidPos = (x, y) => x >= 0 && x < board[0].length && y >= 0 && y < board.length;
+  const [executionTimesString, setExecutionTimesString] = useState('');
+  const [renderer, setRerender] = useState(0);
+
+
+  const searchAlgorithms: SearchAlgorithm[] = [
+    {
+      name: 'A* Algorithm',
+      execute: () => Promise.resolve(aStar(board, getNodeAtPos(start), getNodeAtPos(end))),
+    },
+    {
+      name: 'DFS Algorithm',
+      execute: () => Promise.resolve(DFS(board, getNodeAtPos(start), getNodeAtPos(end))),
+    },
+    {
+      name: 'BFS Algorithm',
+      execute: () => Promise.resolve(BFS(board, getNodeAtPos(start), getNodeAtPos(end))),
+    },
+    // Add more search algorithms and execution functions
+  ];
 
   useEffect(() => {
     setCleanBoardState()
@@ -210,33 +233,44 @@ const Maze = ({ onClick, algoChoice }) => {
   };
 
   const solveClick = async () => {
-    setCleanBoardState();
-    setPaths([]);
-    setExecutionTime(0); // Reset the execution time
+    let executionTimesStr = '';
 
-    const startTime = performance.now(); // Start measuring time
+    for (const algorithm of searchAlgorithms) {
+      // Clear the board before starting a new algorithm
+      const cleanBoard = clearBoard();
 
-    const results = await aStar(board, getNodeAtPos(start), getNodeAtPos(end));
-    const newPath = results[0];
+      // Execute the current algorithm
+      const startTime = performance.now();
+      const results = await algorithm.execute();
+      const executionTime = performance.now() - startTime;
 
-    const endTime = performance.now(); // Stop measuring time
-    const totalTime = endTime - startTime;
+      // Update the execution time for the current algorithm
+      algorithm.executionTime = `${executionTime}`.substring(0,5);
 
-    setExecutionTime(totalTime); // Set the execution time
+      // Append the algorithm name and execution time to the string
+      executionTimesStr += `${algorithm.name} - Time: ${algorithm.executionTime} ms\n`;
 
-    if (newPath?.length) {
-      for (let index = 0; index < newPath.length; index++) {
-        const currPath = newPath.slice(0, index + 1);
+      // Update the board to show the search progress
+      const path = results[0];
+      if (path && path.length > 0) {
+        for (let index = 0; index < path.length; index++) {
+          const currentPath = path.slice(0, index + 1);
+          setPaths(currentPath);
 
-        setTimeout(() => {
-          setPaths(currPath);
-        }, 100 * index);
+          // Introduce a delay to visualize the algorithm's progress
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      } else {
+        alert("Route not possible");
       }
-    } else {
-      alert("Route not possible");
-    }
-  };
 
+      // Force a re-render to update the execution times and board
+      setRerender((prev) => prev + 1);
+    }
+
+    // Update the state with the complete execution times string
+    setExecutionTimesString(executionTimesStr);
+  };
 
   const mapClick = () => {
     const maze = board.map(row => row.map(val => val.value ))
@@ -281,13 +315,23 @@ const Maze = ({ onClick, algoChoice }) => {
 
   return (
     <div className="mazePlaceholder">
-      {lengthInput}x{widthInput} <br />
-      start: {reverseDisplay(start)} end: {reverseDisplay(end)}
-      <button onClick={solveClick}> solve </button>
-      <button onClick={clearBoard}> clear </button>
-      <button onClick={clearWalls}> clear walls</button>
-      <p>Execution Time: {executionTime.toFixed(2)} milliseconds</p>
-
+      <div className="left-column">
+        {lengthInput}x{widthInput} <br />
+        start: {reverseDisplay(start)} end: {reverseDisplay(end)}
+        <button onClick={solveClick}> solve </button>
+        <button onClick={clearBoard}> clear </button>
+        <button onClick={clearWalls}> clear walls</button>
+      </div>
+      <div className="right-column">
+        <h2>Search Algorithms</h2>
+        <ul>
+          {executionTimesString.split("\n").map(algo =>(
+          <li key={algo}>
+            {algo}
+          </li>
+          ))}
+        </ul>
+      </div>
       <button onClick={mapClick}> log map </button>
       <table className="maze">
           <thead>
