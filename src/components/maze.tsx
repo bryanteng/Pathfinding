@@ -34,9 +34,8 @@ const Maze = () => {
   const [path, setPaths] = useState([])
   const isValidPos = (x, y) => x >= 0 && x < board[0].length && y >= 0 && y < board.length;
   const [executionTimesString, setExecutionTimesString] = useState('');
-  const [renderer, setRerender] = useState(0);
-
-
+  const [animationSpeed, setAnimationSpeed] = useState(5); // Default speed
+  const [currentAlgo, setCurrentAlgo] = useState("")
   const searchAlgorithms: SearchAlgorithm[] = [
     {
       name: 'A* Algorithm',
@@ -91,6 +90,11 @@ const Maze = () => {
     const input = <input value={value} onChange={e => handleChange(+e.target.value)} type={type} />;
     return [value, input];
   }
+
+  const handleAnimationSpeedChange = (event) => {
+    setAnimationSpeed(event.target.value);
+  };
+
 
   const clearBoard = () => {
     const newBoard = board.map((row) =>
@@ -235,43 +239,34 @@ const Maze = () => {
   };
 
   const solveClick = async () => {
-    let executionTimesStr = '';
-
+    let algorithmExecutionTimesStr = '';
+    setCurrentAlgo("")
     for (const algorithm of searchAlgorithms) {
-      // Clear the board before starting a new algorithm
-      const cleanBoard = clearBoard();
-
-      // Execute the current algorithm
+      setCurrentAlgo(algorithm.name)
+      const clearedBoard = clearBoard();
       const startTime = performance.now();
       const results = await algorithm.execute();
       const executionTime = performance.now() - startTime;
 
-      // Update the execution time for the current algorithm
-      algorithm.executionTime = `${executionTime}`.substring(0,5);
+      algorithm.executionTime = `${executionTime}`.substring(0, 5);
 
-      // Append the algorithm name and execution time to the string
-      executionTimesStr += `${algorithm.name} - Time: ${algorithm.executionTime} ms\n`;
+      algorithmExecutionTimesStr += `${algorithm.name} - Time: ${algorithm.executionTime} ms\n`;
 
-      // Update the board to show the search progress
       const path = results[0];
       if (path && path.length > 0) {
         for (let index = 0; index < path.length; index++) {
           const currentPath = path.slice(0, index + 1);
           setPaths(currentPath);
 
-          // Introduce a delay to visualize the algorithm's progress
-          await new Promise((resolve) => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 1000 / animationSpeed));
         }
       } else {
         alert("Route not possible");
       }
 
-      // Force a re-render to update the execution times and board
-      // setRerender((prev) => prev + 1);
     }
 
-    // Update the state with the complete execution times string
-    setExecutionTimesString(executionTimesStr);
+    setExecutionTimesString(algorithmExecutionTimesStr);
   };
 
   const getNodeAtPos = (pos: string, reverse: boolean = false): Node => {
@@ -307,42 +302,72 @@ const Maze = () => {
   }
 
   return (
-    <div className="mazePlaceholder">
+    <div className="mazeContainer">
+      {/* Left Column */}
       <div className="left-column">
-        {lengthInput}x{widthInput} <br />
-        start: {reverseDisplay(start)} end: {reverseDisplay(end)}
-        <button onClick={solveClick}> solve </button>
-        <button onClick={clearBoard}> clear </button>
-        <button onClick={clearWalls}> clear walls</button>
+        <div className="maze-options">
+          <h2>Maze Options</h2>
+          {lengthInput}x{widthInput} <br />
+          Start: {reverseDisplay(start)} End: {reverseDisplay(end)}
+        </div>
+        <div className="button-container">
+          <button onClick={solveClick}>Solve</button>
+          <button onClick={clearBoard}>Clear</button>
+          <button onClick={clearWalls}>Clear Walls</button>
+        </div>
+        <div className="animation-speed-slider">
+          <label>Animation Speed</label>
+          <input
+            type="range"
+            min="1"
+            max="20" // Adjust these values as needed
+            step="1"
+            value={animationSpeed}
+            onChange={handleAnimationSpeedChange}
+          />
+          {/* Display the current speed */}
+          <span>{animationSpeed}x</span>
+        </div>
+        <div className="current-algorithm">
+          Current Algorithm: {currentAlgo}
+        </div>
       </div>
+
+      {/* Right Column */}
       <div className="right-column">
         <h2>Search Algorithms</h2>
-        <ul>
-          {/* {searchAlgorithms.map((algorithm) => (
-            <li key={algorithm.name}>
-              {algorithm.name}: {algorithm.executionTime ? `${algorithm.executionTime}ms`: 'Calculating...'}
-            </li>
-          ))} */}
-          {executionTimesString.split("\n").map(algo =>(
-          <li key={algo}>
-            {algo}
-          </li>
-          ))}
-        </ul>
-      </div>
-      <table className="maze">
+        <table className="algorithm-table">
           <thead>
-              <tr>
-                  <th></th>
-                  {Array.from({ length: +width }, (_, index) => (
-                      <th key={index}>{index+1}</th>
-                  ))}
-              </tr>
+            <tr>
+              <th>Algorithm Name</th>
+              <th>Execution Time (ms)</th>
+            </tr>
           </thead>
+          <tbody>
+            {searchAlgorithms.map((algorithm, index) => (
+              <tr key={index}>
+                <td>{algorithm.name}</td>
+                <td>{algorithm.executionTime || 'N/A'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Maze Grid */}
+      <table className="maze">
+        <thead>
+          <tr>
+            <th></th>
+            {Array.from({ length: +width }, (_, index) => (
+              <th key={index}>{index + 1}</th>
+            ))}
+          </tr>
+        </thead>
         <tbody>
           {board.map((line, row_index) => {
             return (
-                <tr key={row_index} className="line"> <span>{row_index + 1}</span>
+              <tr key={row_index} className="line"> <span>{row_index + 1}</span>
                 {line.map(node => (
                   <Cell
                     key={node.pos}
